@@ -2,7 +2,7 @@ NAME
     POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 VERSION
-    version 0.900
+    version 0.900_161
 
 SYNOPSIS
             #!/usr/bin/perl
@@ -111,6 +111,38 @@ DESCRIPTION
     "misc" is optional continuation data that will be passed back in the
     response. It may contain any type of data the application requires.
 
+   unpack_addr
+    In scalar context, unpack_addr($response_addr_hashref) returns the addr
+    element of $response_addr_hashref in a numeric form appropriate for the
+    address family of the address.
+
+            sub handle_resolver_response {
+                    my ($error, $addresses, $request) = @_[ARG0..ARG2];
+
+                    foreach my $a (@$addresses) {
+                            my $numeric_addr = $resolver->unpack_addr($a);
+                            print "$request->{host} = $numeric_addr\n";
+                    }
+            }
+
+    In list context, it returns the numeric port and address.
+
+            sub handle_resolver_response {
+                    my ($error, $addresses, $request) = @_[ARG0..ARG2];
+
+                    foreach my $a (@$addresses) {
+                            my ($$numeric_addr, $port) = $resolver->unpack_addr($a);
+                            print "$request->{host} = $numeric_addr\n";
+                    }
+            }
+
+    unpack_addr() is a convenience wrapper around getnameinfo() from
+    Socket::GetAddrInfo. You're certainly welcome to use the discrete
+    function instead.
+
+    unpack_addr() returns bleak emptiness on failure, regardless of context.
+    You can check for undef return.
+
    DESTROY
     This component is shut down when it's destroyed, following Perl's rules
     for object destruction. Any pending requests are canceled, and their
@@ -132,6 +164,31 @@ DESCRIPTION
     $_[ARG2] contains a hashref of information provided to the resolve()
     method. Specifically, the values of resolve()'s "host", "service" and
     "misc" parameters.
+
+COMPATIBILITY ISSUES
+  Microsoft Windows
+    This module requires "Microsoft TCP/IP version 6" to be installed. Steps
+    for Windows XP Pro (the steps for your particular version of Windows may
+    be subtly or drastically different):
+
+    *   Open your Control Panel
+
+    *   Open your Network Connections
+
+    *   Select your network connection from the available one(s)
+
+    *   In the Local Area Connection Status dialog, click the Properties
+        button
+
+    *   If "Microsoft TCP/IP version 6" is listed as an item being used, you
+        are done.
+
+    *   Otherwise click Install...
+
+    *   Choose to add a Protocol
+
+    *   And install "Microsoft TCP/IP version 6" from the list of network
+        protocols.
 
 BUGS
     There is no timeout on requests.

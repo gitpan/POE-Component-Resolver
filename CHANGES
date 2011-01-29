@@ -1,3 +1,85 @@
+==============================
+9999-99-99 99:99:99 +0000 HEAD
+==============================
+
+  commit 988decd829bd672b1b18f7994aee3e5067cf2c1e
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Sat Jan 29 14:35:53 2011 -0500
+  
+    Bump the version for release.
+
+  commit d0a5045685d6f6beae536656d61910c1c44d8fd6
+  Author: Apocalypse <perl@0ne.us>
+  Date:   Thu Jan 27 16:49:23 2011 -0500
+  
+    Skip IPv6 tests if they're run on a machine that can't resolve IPv6
+    addresses. We assume localhost can resolve.
+
+  commit a7a1411899c549082a950e396006c656586fc160
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Thu Jan 27 13:22:07 2011 -0500
+  
+    Remove dependency on Socket6, thanks to the work and advice of Paul
+    (LeoNerd) Evans.
+
+  commit 11b45c5ee3d17a3b7f7982c0ff642f99729bbc78
+  Author: Sébastien Aperghis-Tramoni <saper@cpan.org>
+  Date:   Thu Jan 27 12:52:51 2011 -0500
+  
+    Make PoCo-Resolver work on Perl 5.8. Resolves rt.cpan.org #65179.
+
+  commit 17a4f8b02a80785dd1aecc46a72b6c5b3eceedee
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Wed Jan 26 23:00:33 2011 -0500
+  
+    Apparently IPv6 isn't always installed on Windows. Document this, and
+    one way to install it.
+
+  commit 10c301fe0b9079866523b663e59b4ca308b38ce6
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Wed Jan 26 22:03:45 2011 -0500
+  
+    Sidecar process needs STDOUT to be binmode and length() to return
+    octets.
+
+  commit e5e92990ae137d2bfcff21c90f4f642aff51a332
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Wed Jan 26 16:11:48 2011 -0500
+  
+    Add MANIFEST.SKIP for great justice.
+
+  commit c5c2057511f16d3cb8b6d404e575241aba4fc01f
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Wed Jan 26 01:06:34 2011 -0500
+  
+    Prefer AF_INET for compatibility with most of the Internet.
+
+  commit bbd985c088946ed448ee66ba99bf4270d5455fed
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Wed Jan 26 00:25:23 2011 -0500
+  
+    Reinitialize data rather than delete it, so subsequent calls fail
+    nicely rather than crash.
+
+  commit 0693724e2c91e132189d9e5fdaec4fdb96766ca9
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Tue Jan 25 23:34:53 2011 -0500
+  
+    Fix some ASSERT_DEFAULT errors.
+
+  commit 936917152e05b61f0aa876308d248542943037f5
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Tue Jan 25 23:11:04 2011 -0500
+  
+    Add a $VERSION. Fix alias_remove() during shutdown.
+
+  commit 331135226e5fe49acd53f4e9fc48f05a7e80526e
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Tue Jan 25 23:04:34 2011 -0500
+  
+    Add unpack_addr(), which is a convenient way to unpack IPv4 and IPv6
+    addresses when you aren't sure which you've got. 
+
 ===================================
 End of changes in the last 365 days
 ===================================

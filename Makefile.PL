@@ -20,17 +20,16 @@ my %WriteMakefileArgs = (
   'LICENSE' => 'perl',
   'NAME' => 'POE::Component::Resolver',
   'PREREQ_PM' => {
-    'POE' => '1.294',
-    'POE::Filter::Reference' => '1.294',
-    'POE::Wheel::Run' => '1.294',
+    'POE' => '1.294_512',
+    'POE::Filter::Reference' => '1.294_512',
+    'POE::Wheel::Run' => '1.294_512',
     'Scalar::Util' => '1.23',
-    'Socket6' => '0.23',
     'Socket::GetAddrInfo' => '0.19',
     'Storable' => '2.18',
     'Test::More' => '0.96',
     'Time::HiRes' => '1.9711'
   },
-  'VERSION' => '0.900',
+  'VERSION' => '0.900_161',
   'test' => {
     'TESTS' => 't/*.t'
   }

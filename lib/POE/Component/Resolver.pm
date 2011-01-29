@@ -1,7 +1,4 @@
 package POE::Component::Resolver;
-BEGIN {
-  $POE::Component::Resolver::VERSION = '0.900';
-}
 
 use warnings;
 use strict;
@@ -10,14 +7,17 @@ use POE qw(Wheel::Run Filter::Reference);
 use Scalar::Util qw(weaken);
 use Carp qw(croak);
 use Storable qw(nfreeze thaw);
-use Socket::GetAddrInfo qw(:newapi getaddrinfo);
+use Socket::GetAddrInfo qw(
+	:newapi getaddrinfo getnameinfo NI_NUMERICHOST NI_NUMERICSERV
+);
 use Time::HiRes qw(time);
-use Socket qw(AF_INET);
-use Socket6 qw(AF_INET6);
+use Socket qw(unpack_sockaddr_in AF_INET AF_INET6);
 
 use Exporter;
 use base 'Exporter';
 our (@EXPORT_OK) = qw(AF_INET AF_INET6);
+
+our $VERSION = '0.900';
 
 # Plain Perl constructor.
 
@@ -30,7 +30,7 @@ sub new {
 	my $max_resolvers = delete($args{max_resolvers}) || 8;
 
 	my $af_order = delete($args{af_order});
-	if (defined $af_order) {
+	if (defined $af_order and @$af_order) {
 		if (ref($af_order) eq "") {
 			$af_order = [ $af_order ];
 		}
@@ -41,6 +41,11 @@ sub new {
 		my @illegal_afs = grep { ($_ ne AF_INET) && ($_ ne AF_INET6) } @$af_order;
 		croak "af_order may only contain AF_INET and/or AF_INET6" if @illegal_afs;
 	}
+	else {
+		# Default to IPv4 preference for backward compatibility.
+		# TODO - Check an environment variable to override.
+		$af_order = [ AF_INET, AF_INET6 ];
+	}
 
 	my @error = sort keys %args;
 	croak "unknown new() parameter(s): @error" if @error;
@@ -50,6 +55,7 @@ sub new {
 	POE::Session->create(
 		inline_states => {
 			_start           => \&_poe_start,
+			_stop            => sub { undef },  # for ASSERT_DEFAULT
 			request          => \&_poe_request,
 			shutdown         => \&_poe_shutdown,
 			sidecar_closed   => \&_poe_sidecar_closed,
@@ -67,6 +73,10 @@ sub new {
 
 sub DESTROY {
 	my $self = shift;
+
+	# Can't resolve the session: it must already be gone.
+	return unless $poe_kernel->alias_resolve("$self");
+
 	$poe_kernel->call("$self", "shutdown");
 }
 
@@ -79,11 +89,11 @@ sub _poe_shutdown {
 
 	$heap->{shutdown} = 1;
 
-	$kernel->alias_clear($heap->{alias});
+	$kernel->alias_remove($heap->{alias});
 
 	_poe_wipe_sidecars($heap);
 
-	foreach my $request (%{$heap->{requests}}) {
+	foreach my $request (values %{$heap->{requests}}) {
 		$kernel->post(
 			$request->{sender},
 			$request->{event},
@@ -148,6 +158,7 @@ sub _poe_start {
 	$heap->{last_reuqest_id} = 0;
 	$heap->{alias}           = $alias;
 	$heap->{max_resolvers}   = $max_resolvers;
+	$heap->{sidecar_ring}    = [];
 
 	$kernel->alias_set($alias);
 
@@ -193,6 +204,9 @@ sub _sidecar_code {
 	my $filter = POE::Filter::Reference->new();
 	my $buffer = "";
 	my $read_length;
+
+	binmode(STDOUT);
+	use bytes;
 
 	while (1) {
 		if (defined $read_length) {
@@ -277,10 +291,10 @@ sub resolve {
 	);
 
 	my $misc = delete $args{misc};
-	$misc //= "";
+	$misc = "" unless defined $misc;
 
 	my $hints = delete $args{hints};
-	$hints //= { };
+	$hints ||= { };
 
 	my $event = delete $args{event};
 	$event = "resolver_response" unless defined $event and length $event;
@@ -405,9 +419,21 @@ sub _poe_wipe_sidecars {
 		$sidecar->kill(-9);
 	}
 
-	delete $heap->{sidecar};
-	delete $heap->{sidecar_id};
-	delete $heap->{sidecar_ring};
+	$heap->{sidecar}      = {};
+	$heap->{sidecar_id}   = {};
+	$heap->{sidecar_ring} = [];
+}
+
+sub unpack_addr {
+	my ($self, $address_rec) = @_;
+
+	my ($error, $address, $port) = (
+		(getnameinfo $address_rec->{addr}, NI_NUMERICHOST | NI_NUMERICSERV)[0,1]
+	);
+
+	return if $error;
+	return($address, $port) if wantarray();
+	return $address;
 }
 
 1;
@@ -420,7 +446,7 @@ POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 =head1 VERSION
 
-version 0.900
+version 0.900_161
 
 =head1 SYNOPSIS
 
@@ -535,6 +561,39 @@ details.
 "misc" is optional continuation data that will be passed back in the
 response.  It may contain any type of data the application requires.
 
+=head3 unpack_addr
+
+In scalar context, unpack_addr($response_addr_hashref) returns the
+addr element of $response_addr_hashref in a numeric form appropriate
+for the address family of the address.
+
+	sub handle_resolver_response {
+		my ($error, $addresses, $request) = @_[ARG0..ARG2];
+
+		foreach my $a (@$addresses) {
+			my $numeric_addr = $resolver->unpack_addr($a);
+			print "$request->{host} = $numeric_addr\n";
+		}
+	}
+
+In list context, it returns the numeric port and address.
+
+	sub handle_resolver_response {
+		my ($error, $addresses, $request) = @_[ARG0..ARG2];
+
+		foreach my $a (@$addresses) {
+			my ($$numeric_addr, $port) = $resolver->unpack_addr($a);
+			print "$request->{host} = $numeric_addr\n";
+		}
+	}
+
+unpack_addr() is a convenience wrapper around getnameinfo() from
+Socket::GetAddrInfo.  You're certainly welcome to use the discrete
+function instead.
+
+unpack_addr() returns bleak emptiness on failure, regardless of
+context.  You can check for undef return.
+
 =head3 DESTROY
 
 This component is shut down when it's destroyed, following Perl's
@@ -559,6 +618,34 @@ shuts down the component.
 $_[ARG2] contains a hashref of information provided to the resolve()
 method.  Specifically, the values of resolve()'s "host", "service" and
 "misc" parameters.
+
+=head1 COMPATIBILITY ISSUES
+
+=head2 Microsoft Windows
+
+This module requires "Microsoft TCP/IP version 6" to be installed.
+Steps for Windows XP Pro (the steps for your particular version of
+Windows may be subtly or drastically different):
+
+=over
+
+=item * Open your Control Panel
+
+=item * Open your Network Connections
+
+=item * Select your network connection from the available one(s)
+
+=item * In the Local Area Connection Status dialog, click the Properties button
+
+=item * If "Microsoft TCP/IP version 6" is listed as an item being used, you are done.
+
+=item * Otherwise click Install...
+
+=item * Choose to add a Protocol
+
+=item * And install "Microsoft TCP/IP version 6" from the list of network protocols.
+
+=back
 
 =head1 BUGS
 
