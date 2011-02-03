@@ -446,7 +446,7 @@ POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 =head1 VERSION
 
-version 0.900_161
+version 0.910
 
 =head1 SYNOPSIS
 

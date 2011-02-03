@@ -2,7 +2,7 @@ NAME
     POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 VERSION
-    version 0.900_161
+    version 0.910
 
 SYNOPSIS
             #!/usr/bin/perl

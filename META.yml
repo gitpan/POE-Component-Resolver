@@ -13,9 +13,7 @@ meta-spec:
   version: 1.4
 name: POE-Component-Resolver
 requires:
-  POE: 1.294_512
-  POE::Filter::Reference: 1.294_512
-  POE::Wheel::Run: 1.294_512
+  POE: 1.299
   Scalar::Util: 1.23
   Socket::GetAddrInfo: 0.19
   Storable: 2.18
@@ -23,4 +21,4 @@ requires:
   Time::HiRes: 1.9711
 resources:
   repository: git://github.com/rcaputo/poe-component-resolver.git
-version: 0.900_161
+version: 0.910
