@@ -1,4 +1,14 @@
 ================================
+2011-02-20 22:58:16 -0500 v0_911
+================================
+
+  commit 8a3ed8c4fa5dbb4819f70de3a0d9eab8d736c6fd
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Sun Feb 20 22:58:16 2011 -0500
+  
+    Remove VERSION assignment so that dzil can do it for us. 
+
+================================
 2011-02-02 20:14:29 -0500 v0_910
 ================================
 

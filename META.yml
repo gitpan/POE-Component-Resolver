@@ -21,4 +21,4 @@ requires:
   Time::HiRes: 1.9711
 resources:
   repository: git://github.com/rcaputo/poe-component-resolver.git
-version: 0.910
+version: 0.911

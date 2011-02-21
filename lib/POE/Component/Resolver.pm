@@ -1,4 +1,7 @@
 package POE::Component::Resolver;
+BEGIN {
+  $POE::Component::Resolver::VERSION = '0.911';
+}
 
 use warnings;
 use strict;
@@ -16,8 +19,6 @@ use Socket qw(unpack_sockaddr_in AF_INET AF_INET6);
 use Exporter;
 use base 'Exporter';
 our (@EXPORT_OK) = qw(AF_INET AF_INET6);
-
-our $VERSION = '0.900';
 
 # Plain Perl constructor.
 
@@ -446,7 +447,7 @@ POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 =head1 VERSION
 
-version 0.910
+version 0.911
 
 =head1 SYNOPSIS
 
