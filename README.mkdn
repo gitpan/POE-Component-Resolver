@@ -4,7 +4,7 @@ POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 # VERSION
 
-version 0.911
+version 0.912
 
 # SYNOPSIS
 
@@ -18,7 +18,8 @@ version 0.911
 
 	my $r = POE::Component::Resolver->new(
 		max_resolvers => 8,
-		af_order => [ AF_INET6, AF_INET ],
+		idle_timeout  => 5,
+		af_order      => [ AF_INET6, AF_INET ],
 	);
 
 	my @hosts = qw( ipv6-test.com );
@@ -88,10 +89,13 @@ Socket::GetAddrInfo provides them.
 		af_order => [ AF_INET6 ]
 	);
 
+"idle_timeout" determines how long to keep idle resolver subprocesses
+before cleaning them up, in seconds.  It defaults to 15.0 seconds.
+
 "max_resolvers" controls the component's parallelism by defining the
 maximum number of sidecar processes to manage.  It defaults to 8, but
-fewer or more processes can be configured depending on usage
-requirements.
+fewer or more processes can be configured depending on the resources
+you have available and the amount of parallelism you require.
 
 	# One at a time, but without the pesky blocking.
 	my $r3 = POE::Component::Resolver->new( max_resolvers => 1 );
@@ -118,6 +122,16 @@ details.
 
 "misc" is optional continuation data that will be passed back in the
 response.  It may contain any type of data the application requires.
+
+### shutdown
+
+Shut down the resolver.  POE::Component::Resolver retains resources
+including child processes for up to "idle_timeout" seconds.  This may
+keep programs running up to "idle_timeout" seconds longer than they
+should.
+
+POE::Component::Resolver will release its resources (including child
+processes) when its shutdown() method is called.
 
 ### unpack_addr
 
@@ -151,12 +165,6 @@ function instead.
 
 unpack_addr() returns bleak emptiness on failure, regardless of
 context.  You can check for undef return.
-
-### DESTROY
-
-This component is shut down when it's destroyed, following Perl's
-rules for object destruction.  Any pending requests are canceled, and
-their responses will be errors.
 
 ## PUBLIC EVENTS
 
@@ -206,6 +214,30 @@ Windows may be subtly or drastically different):
 There is no timeout on requests.
 
 There is no way to cancel a pending request.
+
+# TROUBLESHOOTING
+
+## programs linger for several seconds before exiting
+
+Programs should shutdown() their POE::Component::Resolver objects when
+they are through needing asynchronous DNS resolution.  Programs should
+additionally destroy their resolvers if they intend to run awhile and
+want to reuse the memory they consume.
+
+In some cases, it may be necessary to shutdown components that perform
+asynchronous DNS using POE::Component::Resolver... such as
+POE::Component::IRC, POE::Component::Client::Keepalive and
+POE::Component::Client::HTTP.
+
+By default, the resolver subprocesses hang around for idle_timeout,
+which defaults to 15.0 seconds.  Destroying the Resolver object will
+clean up the process pool.  Assuming only that is keeping the event
+loop active, the program will then exit cleanly.
+
+Alternatively, reduce idle_timeout to a more manageable number, such
+as 5.0 seconds.
+
+Otherwise something else may also be keeping the event loop active.
 
 # LICENSE
 

@@ -8,6 +8,7 @@ README
 README.mkdn
 dist.ini
 lib/POE/Component/Resolver.pm
+lib/POE/Component/Resolver/Sidecar.pm
 t/000-report-versions.t
 t/01-basic.t
 t/release-pod-coverage.t

@@ -1,20 +1,16 @@
 package POE::Component::Resolver;
 BEGIN {
-  $POE::Component::Resolver::VERSION = '0.911';
+  $POE::Component::Resolver::VERSION = '0.912';
 }
 
 use warnings;
 use strict;
 
 use POE qw(Wheel::Run Filter::Reference);
-use Scalar::Util qw(weaken);
 use Carp qw(croak);
-use Storable qw(nfreeze thaw);
-use Socket::GetAddrInfo qw(
-	:newapi getaddrinfo getnameinfo NI_NUMERICHOST NI_NUMERICSERV
-);
 use Time::HiRes qw(time);
 use Socket qw(unpack_sockaddr_in AF_INET AF_INET6);
+use Socket::GetAddrInfo qw(:newapi getnameinfo NI_NUMERICHOST NI_NUMERICSERV);
 
 use Exporter;
 use base 'Exporter';
@@ -29,6 +25,7 @@ sub new {
 	my %args = @args;
 
 	my $max_resolvers = delete($args{max_resolvers}) || 8;
+	my $idle_timeout  = delete($args{idle_timeout})  || 15;
 
 	my $af_order = delete($args{af_order});
 	if (defined $af_order and @$af_order) {
@@ -57,6 +54,8 @@ sub new {
 		inline_states => {
 			_start           => \&_poe_start,
 			_stop            => sub { undef },  # for ASSERT_DEFAULT
+			_parent          => sub { undef },  # for ASSERT_DEFAULT
+			_child           => sub { undef },  # for ASSERT_DEFAULT
 			request          => \&_poe_request,
 			shutdown         => \&_poe_shutdown,
 			sidecar_closed   => \&_poe_sidecar_closed,
@@ -66,13 +65,30 @@ sub new {
 			sidecar_eject    => \&_poe_sidecar_eject,
 			sidecar_attach   => \&_poe_sidecar_attach,
 		},
-		args => [ "$self", $max_resolvers, $af_order ],
+		heap => {
+			af_order        => $af_order,
+			alias           => "$self",
+			idle_timeout    => $idle_timeout,
+			last_request_id => 0,
+			max_resolvers   => $max_resolvers,
+			requests        => { },
+			sidecar_ring    => [ ],
+		}
 	);
 
 	return $self;
 }
 
 sub DESTROY {
+	my $self = shift;
+
+	# Can't resolve the session: it must already be gone.
+	return unless $poe_kernel->alias_resolve("$self");
+
+	$poe_kernel->call("$self", "shutdown");
+}
+
+sub shutdown {
 	my $self = shift;
 
 	# Can't resolve the session: it must already be gone.
@@ -143,6 +159,9 @@ sub _poe_request {
 		sidecar_id  => $next_sidecar->ID(),
 	};
 
+	# No ejecting until we're done.
+	$kernel->delay(sidecar_eject => undef);
+
 	return 1;
 }
 
@@ -150,18 +169,9 @@ sub _poe_request {
 # processes, which are owned and managed by that session.
 
 sub _poe_start {
-	my ($kernel, $heap, $alias, $max_resolvers, $af_order) = @_[
-		KERNEL, HEAP, ARG0..ARG2
-	];
+	my ($kernel, $heap) = @_[KERNEL, HEAP];
 
-	$heap->{af_order}        = $af_order;
-	$heap->{requests}        = {};
-	$heap->{last_reuqest_id} = 0;
-	$heap->{alias}           = $alias;
-	$heap->{max_resolvers}   = $max_resolvers;
-	$heap->{sidecar_ring}    = [];
-
-	$kernel->alias_set($alias);
+	$kernel->alias_set($heap->{alias});
 
 	_poe_setup_sidecar_ring($kernel, $heap);
 
@@ -176,13 +186,23 @@ sub _poe_setup_sidecar_ring {
 
 	return if $heap->{shutdown};
 
-	while (scalar keys %{$heap->{sidecar}} < $heap->{max_resolvers}) {
+	while (scalar(keys %{$heap->{sidecar}}) < $heap->{max_resolvers}) {
 		my $sidecar = POE::Wheel::Run->new(
 			StdioFilter  => POE::Filter::Reference->new(),
 			StdoutEvent  => 'sidecar_response',
 			StderrEvent  => 'sidecar_error',
 			CloseEvent   => 'sidecar_closed',
-			Program      => \&_sidecar_code,
+			Program      => (
+				($^O eq "MSWin32")
+				? \&POE::Component::Resolver::Sidecar::main
+				: [
+					$^X,
+					(map { "-I$_" } @INC),
+					'-MPOE::Component::Resolver::Sidecar',
+					'-e',
+					'POE::Component::Resolver::Sidecar->main()'
+				]
+			),
 		);
 
 		$heap->{sidecar}{$sidecar->PID}   = $sidecar;
@@ -190,47 +210,6 @@ sub _poe_setup_sidecar_ring {
 		push @{$heap->{sidecar_ring}}, $sidecar;
 
 		$kernel->sig_child($sidecar->PID(), "sidecar_signal");
-	}
-}
-
-# Internal helper sub.  This is the code that will run within each
-# sidecar process.  It accepts requests from the main process, runs
-# the blocking getaddrinfo() for each request, and returns responses.
-#
-# TODO - This would be more efficient as a stand-alone Perl program.
-# The program at large can be quite... large... and forking it for
-# just this snip of code seems inefficient.
-
-sub _sidecar_code {
-	my $filter = POE::Filter::Reference->new();
-	my $buffer = "";
-	my $read_length;
-
-	binmode(STDOUT);
-	use bytes;
-
-	while (1) {
-		if (defined $read_length) {
-			if (length($buffer) >= $read_length) {
-				my $request = thaw(substr($buffer, 0, $read_length, ""));
-				$read_length = undef;
-
-				my ($request_id, $host, $service, $hints) = @$request;
-				my ($err, @addrs) = getaddrinfo($host, $service, $hints);
-
-				my $streamable = nfreeze( [ $request_id, $err, \@addrs ] );
-				print length($streamable), chr(0), $streamable;
-
-				next;
-			}
-		}
-		elsif ($buffer =~ s/^(\d+)\0//) {
-			$read_length = $1;
-			next;
-		}
-
-		my $octets_read = sysread(STDIN, $buffer, 4096, length($buffer));
-		last unless $octets_read;
 	}
 }
 
@@ -374,7 +353,9 @@ sub _poe_sidecar_response {
 	$kernel->refcount_decrement($request_rec->{sender}, __PACKAGE__);
 
 	# No more requests?  Consder detaching sidecar.
-	$kernel->yield("sidecar_eject") unless scalar keys %{$heap->{requests}};
+	$kernel->delay(sidecar_eject => $heap->{idle_timeout}) unless (
+		scalar keys %{$heap->{requests}}
+	);
 }
 
 # A sidecar process has exited.  Clean up its resources, and attach a
@@ -447,7 +428,7 @@ POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 =head1 VERSION
 
-version 0.911
+version 0.912
 
 =head1 SYNOPSIS
 
@@ -461,7 +442,8 @@ version 0.911
 
 	my $r = POE::Component::Resolver->new(
 		max_resolvers => 8,
-		af_order => [ AF_INET6, AF_INET ],
+		idle_timeout  => 5,
+		af_order      => [ AF_INET6, AF_INET ],
 	);
 
 	my @hosts = qw( ipv6-test.com );
@@ -531,10 +513,13 @@ Socket::GetAddrInfo provides them.
 		af_order => [ AF_INET6 ]
 	);
 
+"idle_timeout" determines how long to keep idle resolver subprocesses
+before cleaning them up, in seconds.  It defaults to 15.0 seconds.
+
 "max_resolvers" controls the component's parallelism by defining the
 maximum number of sidecar processes to manage.  It defaults to 8, but
-fewer or more processes can be configured depending on usage
-requirements.
+fewer or more processes can be configured depending on the resources
+you have available and the amount of parallelism you require.
 
 	# One at a time, but without the pesky blocking.
 	my $r3 = POE::Component::Resolver->new( max_resolvers => 1 );
@@ -561,6 +546,16 @@ details.
 
 "misc" is optional continuation data that will be passed back in the
 response.  It may contain any type of data the application requires.
+
+=head3 shutdown
+
+Shut down the resolver.  POE::Component::Resolver retains resources
+including child processes for up to "idle_timeout" seconds.  This may
+keep programs running up to "idle_timeout" seconds longer than they
+should.
+
+POE::Component::Resolver will release its resources (including child
+processes) when its shutdown() method is called.
 
 =head3 unpack_addr
 
@@ -594,12 +589,6 @@ function instead.
 
 unpack_addr() returns bleak emptiness on failure, regardless of
 context.  You can check for undef return.
-
-=head3 DESTROY
-
-This component is shut down when it's destroyed, following Perl's
-rules for object destruction.  Any pending requests are canceled, and
-their responses will be errors.
 
 =head2 PUBLIC EVENTS
 
@@ -653,6 +642,30 @@ Windows may be subtly or drastically different):
 There is no timeout on requests.
 
 There is no way to cancel a pending request.
+
+=head1 TROUBLESHOOTING
+
+=head2 programs linger for several seconds before exiting
+
+Programs should shutdown() their POE::Component::Resolver objects when
+they are through needing asynchronous DNS resolution.  Programs should
+additionally destroy their resolvers if they intend to run awhile and
+want to reuse the memory they consume.
+
+In some cases, it may be necessary to shutdown components that perform
+asynchronous DNS using POE::Component::Resolver... such as
+POE::Component::IRC, POE::Component::Client::Keepalive and
+POE::Component::Client::HTTP.
+
+By default, the resolver subprocesses hang around for idle_timeout,
+which defaults to 15.0 seconds.  Destroying the Resolver object will
+clean up the process pool.  Assuming only that is keeping the event
+loop active, the program will then exit cleanly.
+
+Alternatively, reduce idle_timeout to a more manageable number, such
+as 5.0 seconds.
+
+Otherwise something else may also be keeping the event loop active.
 
 =head1 LICENSE
 
