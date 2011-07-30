@@ -4,9 +4,9 @@ author:
   - 'Rocco Caputo <rcaputo@cpan.org>'
 build_requires: {}
 configure_requires:
-  ExtUtils::MakeMaker: 6.31
+  ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.200004, CPAN::Meta::Converter version 2.102400'
+generated_by: 'Dist::Zilla version 4.200011, CPAN::Meta::Converter version 2.102400'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -21,4 +21,4 @@ requires:
   Time::HiRes: 1.9711
 resources:
   repository: git://github.com/rcaputo/poe-component-resolver.git
-version: 0.912
+version: 0.913

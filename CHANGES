@@ -1,4 +1,46 @@
 ================================
+2011-07-30 04:02:15 -0400 v0_913
+================================
+
+  commit b2d2af51183d837e5e98d7cf0324ea9429ef54dc
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Sat Jul 30 04:02:15 2011 -0400
+  
+    Bump the release version.
+
+  commit 82af41c8ab2dd061acd7deb9979fa6cb5c4725ae
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Sat Jul 30 03:49:09 2011 -0400
+  
+    Allow developers to use sidecar-based modules with PAR and other
+    packagers.
+
+    Applied a modified versin of a patch from Markus Jansen at Ericsson.
+    It adds a parameter to POE::Component::Resolver so the developer can
+    point to a custom sidecar program. That program can be bundld in PAR
+    using special techniques. Thanks also go to Steffen Mueller and
+    Roderich Schupp, who helped design the patch.
+
+  commit f0d9d4484e3a3400c7b9ca6b712882e0e20a04d6
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Fri Jul 29 08:59:32 2011 -0400
+  
+    Use port 80 rather than string "http" on Solaris.
+
+    Chris Williams discovered tests would fail on Solaris with "service
+    name not available for the specified socket type". It turns out they
+    don't list "http" in /etc/services.
+
+  commit 638cd9e616a5b4ffbf413672784f41896de97430
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Fri Jul 29 00:44:00 2011 -0400
+  
+    Load the POE::Component::Resolver::Sidecar class.
+
+    The presence of this module is requested on MSWin32. Resolves
+    rt.cpan.org ticket 69172, reported by Gabor Szabo. 
+
+================================
 2011-05-03 22:38:41 -0400 v0_912
 ================================
 
