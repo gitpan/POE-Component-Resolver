@@ -1,4 +1,19 @@
 ================================
+2011-09-15 01:27:46 -0400 v0_914
+================================
+
+  commit e4f3fb11df5d5bf43a1445edc498cb4ee75839ae
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date:   Thu Sep 15 01:27:46 2011 -0400
+  
+    Resolve a runaway fork when running in EmbedPerl.
+
+    Sjors Gielen reported a runaway fork in irc.perl.org #poe. $^X is not
+    always a path to the perl binary. Resolved by using Configure's
+    notion of perlpath and _exe, per Sjors' recommendation and discussion
+    of $^X in perlvar. 
+
+================================
 2011-07-30 04:02:15 -0400 v0_913
 ================================
 
