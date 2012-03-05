@@ -1,6 +1,6 @@
 package POE::Component::Resolver;
 {
-  $POE::Component::Resolver::VERSION = '0.915';
+  $POE::Component::Resolver::VERSION = '0.916';
 }
 
 use warnings;
@@ -158,6 +158,9 @@ sub _poe_shutdown {
 	}
 
 	$heap->{requests} = {};
+
+	# No more sidecars to eject.
+	$kernel->delay(sidecar_eject => undef);
 }
 
 # POE event handler to accept a request from some other session.  The
@@ -453,7 +456,7 @@ POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 =head1 VERSION
 
-version 0.915
+version 0.916
 
 =head1 SYNOPSIS
 
