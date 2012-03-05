@@ -9,27 +9,27 @@ use ExtUtils::MakeMaker 6.30;
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'A non-blocking getaddrinfo() resolver',
-  'AUTHOR' => 'Rocco Caputo <rcaputo@cpan.org>',
-  'BUILD_REQUIRES' => {},
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.30'
+  "ABSTRACT" => "A non-blocking getaddrinfo() resolver",
+  "AUTHOR" => "Rocco Caputo <rcaputo\@cpan.org>",
+  "BUILD_REQUIRES" => {},
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30"
   },
-  'DISTNAME' => 'POE-Component-Resolver',
-  'EXE_FILES' => [],
-  'LICENSE' => 'perl',
-  'NAME' => 'POE::Component::Resolver',
-  'PREREQ_PM' => {
-    'POE' => '1.311',
-    'Scalar::Util' => '1.23',
-    'Socket::GetAddrInfo' => '0.19',
-    'Storable' => '2.18',
-    'Test::More' => '0.96',
-    'Time::HiRes' => '1.9711'
+  "DISTNAME" => "POE-Component-Resolver",
+  "EXE_FILES" => [],
+  "LICENSE" => "perl",
+  "NAME" => "POE::Component::Resolver",
+  "PREREQ_PM" => {
+    "POE" => "1.311",
+    "Scalar::Util" => "1.23",
+    "Socket::GetAddrInfo" => "0.19",
+    "Storable" => "2.18",
+    "Test::More" => "0.96",
+    "Time::HiRes" => "1.9711"
   },
-  'VERSION' => '0.914',
-  'test' => {
-    'TESTS' => 't/*.t'
+  "VERSION" => "0.915",
+  "test" => {
+    "TESTS" => "t/*.t"
   }
 );
 

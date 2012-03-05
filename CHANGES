@@ -1,11 +1,62 @@
-================================
-2011-09-15 01:27:46 -0400 v0_914
-================================
+==================================================
+Changes from 2011-03-06 00:00:00 +0000 to present.
+==================================================
 
-  commit e4f3fb11df5d5bf43a1445edc498cb4ee75839ae
+------------------------------------------
+version 0.915 at 2012-03-05 00:18:21 +0000
+------------------------------------------
+
+  Change: 466a7e1fa548913d59dcc454951c5bd0e293d551
   Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Thu Sep 15 01:27:46 2011 -0400
-  
+  Date : 2012-03-04 19:17:58 +0000
+
+    Fix dist.ini and .gitignore to allow Git::Check to pass. 
+
+  Change: 3557a330346457155b951c505decc4152abaf0d3
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-03-04 18:48:42 +0000
+
+    [rt.cpan.org 67601] Test IPv6 availability against non-localhost.
+
+    Larwan Burke pointed out that localhost is a bad name to resolve when
+    testing for IPv6 availability. It tends to be in /etc/hosts, which
+    resolves whether or not the named can. 
+
+  Change: 32d22afac0c59a6ad5f68dd690a5c17849a0536f
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-03-04 17:06:56 +0000
+
+    [rt.cpan.org 74486] Fix a typo in a hash key.
+
+    I hate hash-based data structures for just this reason: typos are
+    silently ignored. Many thanks to Jon Portnoy for reporting this one. 
+
+  Change: 9c3be3c8497c043f7883136383c00ce42baa95d9
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-03-04 17:03:52 +0000
+
+    Add an environment variable to override the default IP version
+    preference.
+
+    As IPv6 is adopted, more and more places will behave differently than
+    expected. The POCO_RESOLVER_IPV environment variable gives users a
+    way to override the legacy behavior during this potentially painful
+    transition. 
+
+  Change: 4ba15258e501c522856aa2f0e89ac3e429ae0ed3
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-03-04 17:03:01 +0000
+
+    Update dist.ini to automatically bump versions and tag releases. 
+
+------------------------------------------
+version 0_914 at 2011-09-15 05:27:46 +0000
+------------------------------------------
+
+  Change: e4f3fb11df5d5bf43a1445edc498cb4ee75839ae
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2011-09-15 01:27:46 +0000
+
     Resolve a runaway fork when running in EmbedPerl.
 
     Sjors Gielen reported a runaway fork in irc.perl.org #poe. $^X is not
@@ -13,20 +64,20 @@
     notion of perlpath and _exe, per Sjors' recommendation and discussion
     of $^X in perlvar. 
 
-================================
-2011-07-30 04:02:15 -0400 v0_913
-================================
+------------------------------------------
+version 0_913 at 2011-07-30 08:02:15 +0000
+------------------------------------------
 
-  commit b2d2af51183d837e5e98d7cf0324ea9429ef54dc
+  Change: b2d2af51183d837e5e98d7cf0324ea9429ef54dc
   Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Sat Jul 30 04:02:15 2011 -0400
-  
-    Bump the release version.
+  Date : 2011-07-30 04:02:15 +0000
 
-  commit 82af41c8ab2dd061acd7deb9979fa6cb5c4725ae
+    Bump the release version. 
+
+  Change: 82af41c8ab2dd061acd7deb9979fa6cb5c4725ae
   Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Sat Jul 30 03:49:09 2011 -0400
-  
+  Date : 2011-07-30 03:49:09 +0000
+
     Allow developers to use sidecar-based modules with PAR and other
     packagers.
 
@@ -34,170 +85,72 @@
     It adds a parameter to POE::Component::Resolver so the developer can
     point to a custom sidecar program. That program can be bundld in PAR
     using special techniques. Thanks also go to Steffen Mueller and
-    Roderich Schupp, who helped design the patch.
+    Roderich Schupp, who helped design the patch. 
 
-  commit f0d9d4484e3a3400c7b9ca6b712882e0e20a04d6
+  Change: f0d9d4484e3a3400c7b9ca6b712882e0e20a04d6
   Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Fri Jul 29 08:59:32 2011 -0400
-  
+  Date : 2011-07-29 08:59:32 +0000
+
     Use port 80 rather than string "http" on Solaris.
 
     Chris Williams discovered tests would fail on Solaris with "service
     name not available for the specified socket type". It turns out they
-    don't list "http" in /etc/services.
+    don't list "http" in /etc/services. 
 
-  commit 638cd9e616a5b4ffbf413672784f41896de97430
+  Change: 638cd9e616a5b4ffbf413672784f41896de97430
   Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Fri Jul 29 00:44:00 2011 -0400
-  
+  Date : 2011-07-29 00:44:00 +0000
+
     Load the POE::Component::Resolver::Sidecar class.
 
     The presence of this module is requested on MSWin32. Resolves
     rt.cpan.org ticket 69172, reported by Gabor Szabo. 
 
-================================
-2011-05-03 22:38:41 -0400 v0_912
-================================
+------------------------------------------
+version 0_912 at 2011-05-04 02:38:41 +0000
+------------------------------------------
 
-  commit d0c8a4b0fbf6c6e8e86d83790941efe84d176ba4
+  Change: d0c8a4b0fbf6c6e8e86d83790941efe84d176ba4
   Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Tue May 3 22:38:41 2011 -0400
-  
-    Prepare for next release.
+  Date : 2011-05-03 22:38:41 +0000
 
-  commit f8d05b1ef5f76133b3c59500d720eed1a074fdc9
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Tue May 3 22:38:14 2011 -0400
-  
-    Relying upon DESTROY wasn't reliable. Add a shutdown() method.
+    Prepare for next release. 
 
-  commit f676b39c5fb373b4c83105415e7bb532556ea875
+  Change: f8d05b1ef5f76133b3c59500d720eed1a074fdc9
   Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Sun Apr 24 16:28:04 2011 -0400
-  
-    Remove unused GetAddrInfo imports from Sidecar.pm.
+  Date : 2011-05-03 22:38:14 +0000
 
-  commit 22387e0e157e5cb473314727e0752380da9d8fe6
+    Relying upon DESTROY wasn't reliable. Add a shutdown() method. 
+
+  Change: f676b39c5fb373b4c83105415e7bb532556ea875
   Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Sun Apr 24 16:15:13 2011 -0400
-  
+  Date : 2011-04-24 16:28:04 +0000
+
+    Remove unused GetAddrInfo imports from Sidecar.pm. 
+
+  Change: 22387e0e157e5cb473314727e0752380da9d8fe6
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2011-04-24 16:15:13 +0000
+
     Add sidecar processes to reduce this component's memory footprint.
     Prompted by Karen_m's memory issues, and recommended by gcola,
-    Hinrik, and Apocalypse on irc.perl.org #poe. You people rock! :)
+    Hinrik, and Apocalypse on irc.perl.org #poe. You people rock! :) 
 
-  commit faa1588e8a7417b20c3745490e50033bcc744f54
+  Change: faa1588e8a7417b20c3745490e50033bcc744f54
   Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Sun Apr 24 15:48:39 2011 -0400
-  
+  Date : 2011-04-24 15:48:39 +0000
+
     Keep sidecar processes around longer, and provide an idle_timeout
     constructor parameter to override just how long that is. This is a
     partial response to Karen_m's report of PID and memory churn
-    introduced by lots of forking.
+    introduced by lots of forking. 
 
-  commit 1acb4707244468521c7712bc3f410fc72fa5df08
+  Change: 1acb4707244468521c7712bc3f410fc72fa5df08
   Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Mon Feb 21 09:15:20 2011 -0500
-  
+  Date : 2011-02-21 09:15:20 +0000
+
     Increase pedantry to mollify assertions. 
 
-================================
-2011-02-20 22:58:16 -0500 v0_911
-================================
-
-  commit 8a3ed8c4fa5dbb4819f70de3a0d9eab8d736c6fd
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Sun Feb 20 22:58:16 2011 -0500
-  
-    Remove VERSION assignment so that dzil can do it for us. 
-
-================================
-2011-02-02 20:14:29 -0500 v0_910
-================================
-
-  commit 77ffaf5f3e8962f7df2628f71653d78fc916c1a8
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Wed Feb 2 20:14:29 2011 -0500
-  
-    Bump revision for release.
-
-  commit 988decd829bd672b1b18f7994aee3e5067cf2c1e
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Sat Jan 29 14:35:53 2011 -0500
-  
-    Bump the version for release.
-
-  commit d0a5045685d6f6beae536656d61910c1c44d8fd6
-  Author: Apocalypse <perl@0ne.us>
-  Date:   Thu Jan 27 16:49:23 2011 -0500
-  
-    Skip IPv6 tests if they're run on a machine that can't resolve IPv6
-    addresses. We assume localhost can resolve.
-
-  commit a7a1411899c549082a950e396006c656586fc160
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Thu Jan 27 13:22:07 2011 -0500
-  
-    Remove dependency on Socket6, thanks to the work and advice of Paul
-    (LeoNerd) Evans.
-
-  commit 11b45c5ee3d17a3b7f7982c0ff642f99729bbc78
-  Author: Sébastien Aperghis-Tramoni <saper@cpan.org>
-  Date:   Thu Jan 27 12:52:51 2011 -0500
-  
-    Make PoCo-Resolver work on Perl 5.8. Resolves rt.cpan.org #65179.
-
-  commit 17a4f8b02a80785dd1aecc46a72b6c5b3eceedee
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Wed Jan 26 23:00:33 2011 -0500
-  
-    Apparently IPv6 isn't always installed on Windows. Document this, and
-    one way to install it.
-
-  commit 10c301fe0b9079866523b663e59b4ca308b38ce6
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Wed Jan 26 22:03:45 2011 -0500
-  
-    Sidecar process needs STDOUT to be binmode and length() to return
-    octets.
-
-  commit e5e92990ae137d2bfcff21c90f4f642aff51a332
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Wed Jan 26 16:11:48 2011 -0500
-  
-    Add MANIFEST.SKIP for great justice.
-
-  commit c5c2057511f16d3cb8b6d404e575241aba4fc01f
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Wed Jan 26 01:06:34 2011 -0500
-  
-    Prefer AF_INET for compatibility with most of the Internet.
-
-  commit bbd985c088946ed448ee66ba99bf4270d5455fed
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Wed Jan 26 00:25:23 2011 -0500
-  
-    Reinitialize data rather than delete it, so subsequent calls fail
-    nicely rather than crash.
-
-  commit 0693724e2c91e132189d9e5fdaec4fdb96766ca9
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Tue Jan 25 23:34:53 2011 -0500
-  
-    Fix some ASSERT_DEFAULT errors.
-
-  commit 936917152e05b61f0aa876308d248542943037f5
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Tue Jan 25 23:11:04 2011 -0500
-  
-    Add a $VERSION. Fix alias_remove() during shutdown.
-
-  commit 331135226e5fe49acd53f4e9fc48f05a7e80526e
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date:   Tue Jan 25 23:04:34 2011 -0500
-  
-    Add unpack_addr(), which is a convenient way to unpack IPv4 and IPv6
-    addresses when you aren't sure which you've got. 
-
-===================================
-End of changes in the last 365 days
-===================================
+================================================
+Plus 3 releases after 2011-03-06 00:00:00 +0000.
+================================================

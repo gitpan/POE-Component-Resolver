@@ -1,6 +1,6 @@
 package POE::Component::Resolver::Sidecar;
-BEGIN {
-  $POE::Component::Resolver::Sidecar::VERSION = '0.914';
+{
+  $POE::Component::Resolver::Sidecar::VERSION = '0.915';
 }
 
 use warnings;
@@ -60,7 +60,7 @@ POE::Component::Resolver::Sidecar - delegate subprocess to call getaddrinfo()
 
 =head1 VERSION
 
-version 0.914
+version 0.915
 
 =head1 SYNOPSIS
 
