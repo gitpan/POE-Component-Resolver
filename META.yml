@@ -22,4 +22,4 @@ requires:
 resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?POE-Component-Resolver
   repository: git://github.com/rcaputo/poe-component-resolver.git
-version: 0.917
+version: 0.918

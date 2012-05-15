@@ -1,6 +1,6 @@
 package POE::Component::Resolver;
 {
-  $POE::Component::Resolver::VERSION = '0.917';
+  $POE::Component::Resolver::VERSION = '0.918';
 }
 
 use warnings;
@@ -506,7 +506,7 @@ sub unpack_addr {
 	my ($self, $address_rec) = @_;
 
 	# [rt.cpan.org 76314] Untaint the address.
-	my ($input_addr) = ($address_rec->{addr} =~ /\A(.*)\z/);
+	my ($input_addr) = ($address_rec->{addr} =~ /\A(.*)\z/s);
 
 	my ($error, $address, $port) = (
 		(getnameinfo $input_addr, NI_NUMERICHOST | NI_NUMERICSERV)[0,1]
@@ -527,7 +527,7 @@ POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 =head1 VERSION
 
-version 0.917
+version 0.918
 
 =head1 SYNOPSIS
 

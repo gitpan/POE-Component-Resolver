@@ -3,7 +3,20 @@ Changes from 2011-05-16 00:00:00 +0000 to present.
 ==================================================
 
 ------------------------------------------
-version 0.917 at 2012-05-15 01:45:17 +0000
+version 0.918 at 2012-05-15 15:20:34 +0000
+------------------------------------------
+
+  Change: 202dea1c77b0b80aae8a06eef5318f63cc189c9e
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-05-15 11:12:36 +0000
+
+    Fix address untainting error.
+
+    Reported by Alberto Simões on irc.perl.org and diagnosted with
+    copious help from Chris Williams. Thanks, guys! 
+
+------------------------------------------
+version 0.917 at 2012-05-13 08:45:53 +0000
 ------------------------------------------
 
   Change: 963f8fe5bf94ddabf53b9b40e9458aad2c895e46
