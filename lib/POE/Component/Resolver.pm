@@ -1,13 +1,13 @@
 package POE::Component::Resolver;
 {
-  $POE::Component::Resolver::VERSION = '0.916';
+  $POE::Component::Resolver::VERSION = '0.917';
 }
 
 use warnings;
 use strict;
 
 use POE qw(Wheel::Run Filter::Reference);
-use Carp qw(croak);
+use Carp qw(croak carp);
 use Time::HiRes qw(time);
 use Socket qw(unpack_sockaddr_in AF_INET AF_INET6);
 use Socket::GetAddrInfo qw(:newapi getnameinfo NI_NUMERICHOST NI_NUMERICSERV);
@@ -17,6 +17,8 @@ use POE::Component::Resolver::Sidecar;
 use Exporter;
 use base 'Exporter';
 our (@EXPORT_OK) = qw(AF_INET AF_INET6);
+
+my $next_alias_index = "aaaaaaaa";
 
 # Determine Perl's location, per perldoc perlvar's treatment of $^X.
 
@@ -38,6 +40,7 @@ sub new {
 
 	my $max_resolvers   = delete($args{max_resolvers}) || 8;
 	my $idle_timeout    = delete($args{idle_timeout})  || 15;
+	my $debug           = delete($args{debug})         || 0;
 	my $sidecar_program = delete($args{sidecar_program});
 
 	my $af_order = delete($args{af_order});
@@ -82,16 +85,20 @@ sub new {
 		}
 	}
 
-	my $self = bless { }, $class;
+	my $self = bless {
+		alias => "poe_component_resolver_" . $next_alias_index++,
+		debug => $debug,
+	}, $class;
 
 	POE::Session->create(
 		inline_states => {
 			_start           => \&_poe_start,
-			_stop            => sub { undef },  # for ASSERT_DEFAULT
+			_stop            => \&_poe_stop,
 			_parent          => sub { undef },  # for ASSERT_DEFAULT
 			_child           => sub { undef },  # for ASSERT_DEFAULT
 			request          => \&_poe_request,
 			shutdown         => \&_poe_shutdown,
+			cancel           => \&_poe_cancel,
 			sidecar_closed   => \&_poe_sidecar_closed,
 			sidecar_error    => \&_poe_sidecar_error,
 			sidecar_response => \&_poe_sidecar_response,
@@ -101,13 +108,14 @@ sub new {
 		},
 		heap => {
 			af_order        => $af_order,
-			alias           => "$self",
+			alias           => $self->{alias},
 			idle_timeout    => $idle_timeout,
 			last_request_id => 0,
 			max_resolvers   => $max_resolvers,
 			requests        => { },
 			sidecar_ring    => [ ],
 			sidecar_program => $sidecar_program,
+			debug           => $debug,
 		}
 	);
 
@@ -118,18 +126,27 @@ sub DESTROY {
 	my $self = shift;
 
 	# Can't resolve the session: it must already be gone.
-	return unless $poe_kernel->alias_resolve("$self");
+	return unless $poe_kernel->alias_resolve($self->{alias});
 
-	$poe_kernel->call("$self", "shutdown");
+	carp "<pcr> destroying $self->{alias}" if $self->{debug};
+
+	$poe_kernel->call($self->{alias}, "shutdown");
+}
+
+sub _poe_stop {
+	my $heap = $_[HEAP];
+	carp "<pcr> stopping $heap->{alias}" if $heap->{debug};
 }
 
 sub shutdown {
 	my $self = shift;
 
 	# Can't resolve the session: it must already be gone.
-	return unless $poe_kernel->alias_resolve("$self");
+	return unless $poe_kernel->alias_resolve($self->{alias});
 
-	$poe_kernel->call("$self", "shutdown");
+	carp "<pcr> got shutdown request for $self->{alias}" if $self->{debug};
+
+	$poe_kernel->call($self->{alias}, "shutdown");
 }
 
 # Internal POE event handler to release all resources owned by the
@@ -152,6 +169,10 @@ sub _poe_shutdown {
 			'component shut down',
 			[ ],
 			{ map { $_ => $request->{$_} } qw(host service misc) },
+		);
+
+		warn "<pcr> $heap->{alias} --refcount for sender $request->{sender}" if (
+			$heap->{debug}
 		);
 
 		$kernel->refcount_decrement($request->{sender}, __PACKAGE__);
@@ -177,6 +198,10 @@ sub _poe_request {
 	my $request_id = ++$heap->{last_request_id};
 	my $sender_id  = $_[SENDER]->ID();
 
+	warn "<pcr> $heap->{alias} ++refcount for sender $sender_id" if (
+		$heap->{debug}
+	);
+
 	$kernel->refcount_increment($sender_id, __PACKAGE__);
 
 	_poe_setup_sidecar_ring($kernel, $heap);
@@ -200,7 +225,31 @@ sub _poe_request {
 	# No ejecting until we're done.
 	$kernel->delay(sidecar_eject => undef);
 
-	return 1;
+	return $request_id;
+}
+
+# The user wishes to cancel a DNS request that may still be in
+# progress.  This can happen in places like PoCo::Client::HTTP when
+# the HTTP request times out before the DNS request is done.
+#
+# The public cancel() API forwards the cancelation request into the
+# POE::Session managing requests via POE::Kernel's call() method.
+
+sub cancel {
+	my ($self, $request_id) = @_;
+	return $poe_kernel->call($self->{alias}, "cancel", $request_id);
+}
+
+# The inside-POE cancelation code.  It must run within POE so that the
+# proper resources are removed from the correct session.
+
+sub _poe_cancel {
+	my ($kernel, $heap, $request_id) = @_[KERNEL, HEAP, ARG0];
+
+	return unless exists $heap->{requests}{$request_id};
+
+	my $request = $heap->{requests}{$request_id};
+	_sidecar_cleanup($kernel, $heap, $request->{sidecar_id});
 }
 
 # POE _start handler.  Initialize the session and start sidecar
@@ -209,9 +258,11 @@ sub _poe_request {
 sub _poe_start {
 	my ($kernel, $heap) = @_[KERNEL, HEAP];
 
+	carp "<pcr> starting $heap->{alias}" if $heap->{debug};
+
 	$kernel->alias_set($heap->{alias});
 
-	_poe_setup_sidecar_ring($kernel, $heap);
+	#_poe_setup_sidecar_ring($kernel, $heap);
 
 	undef;
 }
@@ -310,11 +361,18 @@ sub resolve {
 	my @error = sort keys %args;
 	croak "unknown resolve() parameter(s): @error" if @error;
 
+	my $result;
 	croak "resolve() on shutdown resolver" unless (
-		$poe_kernel->call(
-			"$self", "request", $host, $service, $hints, $event, $misc
+		$result = $poe_kernel->call(
+			$self->{alias}, "request", $host, $service, $hints, $event, $misc
 		)
 	);
+
+	carp "<pcr> $self->{alias} request for host($host) service($service)" if (
+		$self->{debug}
+	);
+
+	return $result;
 }
 
 # A sidecar process has produced an error or warning.  Pass it
@@ -334,6 +392,12 @@ sub _poe_sidecar_closed {
 	# Don't bother checking for pending requests if we've shut down.
 	return if $heap->{shutdown};
 
+	_sidecar_cleanup($kernel, $heap, $wheel_id);
+}
+
+sub _sidecar_cleanup {
+	my ($kernel, $heap, $wheel_id) = @_;
+
 	my $sidecar = delete $heap->{sidecar_id}{$wheel_id};
 	if (defined $sidecar) {
 		$sidecar->kill(9);
@@ -344,7 +408,7 @@ sub _poe_sidecar_closed {
 	my $i = @{$heap->{sidecar_ring}};
 	while ($i--) {
 		next unless $heap->{sidecar_ring}[$i]->ID() == $wheel_id;
-		splice(@{$heap->{sidecar_ring}}, 1, 1);
+		splice(@{$heap->{sidecar_ring}}, $i, 1);
 		last;
 	}
 
@@ -376,6 +440,10 @@ sub _poe_sidecar_response {
 		$request_rec->{sender}, $request_rec->{event},
 		$error, $addresses,
 		{ map { $_ => $request_rec->{$_} } qw(host service misc) },
+	);
+
+	warn "<pcr> $heap->{alias} --refcount for sender $request_rec->{sender}" if (
+		$heap->{debug}
 	);
 
 	$kernel->refcount_decrement($request_rec->{sender}, __PACKAGE__);
@@ -437,8 +505,11 @@ sub _poe_wipe_sidecars {
 sub unpack_addr {
 	my ($self, $address_rec) = @_;
 
+	# [rt.cpan.org 76314] Untaint the address.
+	my ($input_addr) = ($address_rec->{addr} =~ /\A(.*)\z/);
+
 	my ($error, $address, $port) = (
-		(getnameinfo $address_rec->{addr}, NI_NUMERICHOST | NI_NUMERICSERV)[0,1]
+		(getnameinfo $input_addr, NI_NUMERICHOST | NI_NUMERICSERV)[0,1]
 	);
 
 	return if $error;
@@ -456,7 +527,7 @@ POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 =head1 VERSION
 
-version 0.916
+version 0.917
 
 =head1 SYNOPSIS
 
@@ -571,8 +642,10 @@ The sidecar program needs to contain at least two statements:
 
 resolve() begins a new request to resolve a domain.  The request will
 be enqueued in the component until a sidecar process can service it.
-Resolve requires two parameters and accepts some additional optional
-ones.
+resolve() returns a request ID that may be used to cancel() a request
+before it has completed (or undef if the request couldn't begin, such
+as during shutdown).  Resolve requires two parameters and accepts some
+additional optional ones.
 
 "host" and "service" are required and contain the host (name or
 Internet address) and service (name or numeric port) that will be
@@ -589,6 +662,13 @@ details.
 
 "misc" is optional continuation data that will be passed back in the
 response.  It may contain any type of data the application requires.
+
+=head3 cancel
+
+Cancel a request, given the request's ID.
+
+	my $request_id = $resolver->resolve("poe.dyndns.org", "http");
+	$resolver->cancel($request_id);
 
 =head3 shutdown
 

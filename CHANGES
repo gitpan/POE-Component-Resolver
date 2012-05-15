@@ -1,9 +1,54 @@
 ==================================================
-Changes from 2011-03-06 00:00:00 +0000 to present.
+Changes from 2011-05-16 00:00:00 +0000 to present.
 ==================================================
 
 ------------------------------------------
-version 0.916 at 2012-03-05 02:56:43 +0000
+version 0.917 at 2012-05-15 01:45:17 +0000
+------------------------------------------
+
+  Change: 963f8fe5bf94ddabf53b9b40e9458aad2c895e46
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-05-13 04:45:53 +0000
+
+    [rt.cpan.org 76987] Add a cancel() method to stop pending requests.
+
+    Modified resolve() to return a request ID. Added cancel(), which
+    accepts a request ID and cancels it.
+    POE::Component::Client::Keepalive requires it. 
+
+  Change: 34d54dbcb61ada8b0f97b4e145723be9dc35c542
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-05-05 19:01:15 +0000
+
+    [rt.cpan.org 76550] Avoid hang when no requests made.
+
+    Fixed thanks to Sergei Kozunov's bug report and test case. A sidecar
+    process was created at startup, but no idle timeout was set. These
+    timeouts are only set when requests happen, and in an application
+    where all addresses are already resolved, no timeout is set. So the
+    component lingers forever. 
+
+  Change: accbcc5a17b77642325a00267e78d1506d936640
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-04-29 19:22:55 +0000
+
+    [rt.cpan.org 76549] Fix a little typo in sidecar cleanup.
+
+    _poe_sidecar_closed() was destroying the wrong sidecar process. Thank
+    you, Kozunov, for the code review and bug report. Two little octets
+    can make a huge difference. 
+
+  Change: 401d307f6ea076b0152e51caf53717ebf7616c90
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-04-29 18:46:27 +0000
+
+    [rt.cpan.org 76314] Untaint addresses before Socket::GetAddrInfo.
+
+    Dylan Doxey pointed out that Socket::GetAddrInfo rejects tainted
+    addresses. Untaint them first, per his recommendation and test case. 
+
+------------------------------------------
+version 0.916 at 2012-03-05 02:55:32 +0000
 ------------------------------------------
 
   Change: 9610861f210360b2d2a6d263a8b0f48a4d134bf4
@@ -116,51 +161,6 @@ version 0_913 at 2011-07-30 08:02:15 +0000
     The presence of this module is requested on MSWin32. Resolves
     rt.cpan.org ticket 69172, reported by Gabor Szabo. 
 
-------------------------------------------
-version 0_912 at 2011-05-04 02:38:41 +0000
-------------------------------------------
-
-  Change: d0c8a4b0fbf6c6e8e86d83790941efe84d176ba4
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date : 2011-05-03 22:38:41 +0000
-
-    Prepare for next release. 
-
-  Change: f8d05b1ef5f76133b3c59500d720eed1a074fdc9
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date : 2011-05-03 22:38:14 +0000
-
-    Relying upon DESTROY wasn't reliable. Add a shutdown() method. 
-
-  Change: f676b39c5fb373b4c83105415e7bb532556ea875
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date : 2011-04-24 16:28:04 +0000
-
-    Remove unused GetAddrInfo imports from Sidecar.pm. 
-
-  Change: 22387e0e157e5cb473314727e0752380da9d8fe6
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date : 2011-04-24 16:15:13 +0000
-
-    Add sidecar processes to reduce this component's memory footprint.
-    Prompted by Karen_m's memory issues, and recommended by gcola,
-    Hinrik, and Apocalypse on irc.perl.org #poe. You people rock! :) 
-
-  Change: faa1588e8a7417b20c3745490e50033bcc744f54
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date : 2011-04-24 15:48:39 +0000
-
-    Keep sidecar processes around longer, and provide an idle_timeout
-    constructor parameter to override just how long that is. This is a
-    partial response to Karen_m's report of PID and memory churn
-    introduced by lots of forking. 
-
-  Change: 1acb4707244468521c7712bc3f410fc72fa5df08
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date : 2011-02-21 09:15:20 +0000
-
-    Increase pedantry to mollify assertions. 
-
 ================================================
-Plus 3 releases after 2011-03-06 00:00:00 +0000.
+Plus 4 releases after 2011-05-16 00:00:00 +0000.
 ================================================

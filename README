@@ -2,7 +2,7 @@ NAME
     POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 VERSION
-    version 0.916
+    version 0.917
 
 SYNOPSIS
             #!/usr/bin/perl
@@ -112,8 +112,10 @@ DESCRIPTION
    resolve
     resolve() begins a new request to resolve a domain. The request will be
     enqueued in the component until a sidecar process can service it.
-    Resolve requires two parameters and accepts some additional optional
-    ones.
+    resolve() returns a request ID that may be used to cancel() a request
+    before it has completed (or undef if the request couldn't begin, such as
+    during shutdown). Resolve requires two parameters and accepts some
+    additional optional ones.
 
     "host" and "service" are required and contain the host (name or Internet
     address) and service (name or numeric port) that will be passed verbatim
@@ -129,6 +131,12 @@ DESCRIPTION
 
     "misc" is optional continuation data that will be passed back in the
     response. It may contain any type of data the application requires.
+
+   cancel
+    Cancel a request, given the request's ID.
+
+            my $request_id = $resolver->resolve("poe.dyndns.org", "http");
+            $resolver->cancel($request_id);
 
    shutdown
     Shut down the resolver. POE::Component::Resolver retains resources
