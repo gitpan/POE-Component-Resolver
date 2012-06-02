@@ -1,9 +1,26 @@
 ==================================================
-Changes from 2011-05-16 00:00:00 +0000 to present.
+Changes from 2011-06-03 00:00:00 +0000 to present.
 ==================================================
 
 ------------------------------------------
-version 0.918 at 2012-05-15 15:20:34 +0000
+version 0.919 at 2012-06-02 06:44:50 +0000
+------------------------------------------
+
+  Change: 4a415e5228e7c41da67027e7821ad606a418363f
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-06-02 02:40:46 +0000
+
+    Fix usage of Socket::GetAddrInfo for new version 0.22.
+
+    avenj on irc.perl.org #poe pointed out that Socket::GetAddrInfo 0.22
+    changed public behavior and began throwing the following error. This
+    change compensates for that and requires version 0.22 or later.
+
+    :newapi tag is no longer supported by Socket::GetAddrInfo; just 'use'
+    it directly 
+
+------------------------------------------
+version 0.918 at 2012-05-15 15:12:36 +0000
 ------------------------------------------
 
   Change: 202dea1c77b0b80aae8a06eef5318f63cc189c9e
@@ -175,5 +192,5 @@ version 0_913 at 2011-07-30 08:02:15 +0000
     rt.cpan.org ticket 69172, reported by Gabor Szabo. 
 
 ================================================
-Plus 4 releases after 2011-05-16 00:00:00 +0000.
+Plus 4 releases after 2011-06-03 00:00:00 +0000.
 ================================================

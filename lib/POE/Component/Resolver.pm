@@ -1,6 +1,6 @@
 package POE::Component::Resolver;
 {
-  $POE::Component::Resolver::VERSION = '0.918';
+  $POE::Component::Resolver::VERSION = '0.919';
 }
 
 use warnings;
@@ -10,7 +10,7 @@ use POE qw(Wheel::Run Filter::Reference);
 use Carp qw(croak carp);
 use Time::HiRes qw(time);
 use Socket qw(unpack_sockaddr_in AF_INET AF_INET6);
-use Socket::GetAddrInfo qw(:newapi getnameinfo NI_NUMERICHOST NI_NUMERICSERV);
+use Socket::GetAddrInfo qw(getnameinfo NI_NUMERICHOST NI_NUMERICSERV);
 
 use POE::Component::Resolver::Sidecar;
 
@@ -527,7 +527,7 @@ POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 =head1 VERSION
 
-version 0.918
+version 0.919
 
 =head1 SYNOPSIS
 

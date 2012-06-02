@@ -4,7 +4,7 @@ POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 # VERSION
 
-version 0.918
+version 0.919
 
 # SYNOPSIS
 
