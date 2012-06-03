@@ -22,12 +22,12 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "POE" => "1.311",
     "Scalar::Util" => "1.23",
-    "Socket::GetAddrInfo" => "0.22",
+    "Socket" => "2.001",
     "Storable" => "2.18",
     "Test::More" => "0.96",
     "Time::HiRes" => "1.9711"
   },
-  "VERSION" => "0.919",
+  "VERSION" => "0.920",
   "test" => {
     "TESTS" => "t/*.t"
   }

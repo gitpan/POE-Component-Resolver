@@ -1,6 +1,6 @@
 package POE::Component::Resolver::Sidecar;
 {
-  $POE::Component::Resolver::Sidecar::VERSION = '0.919';
+  $POE::Component::Resolver::Sidecar::VERSION = '0.920';
 }
 
 use warnings;
@@ -8,7 +8,7 @@ use strict;
 
 use Storable qw(nfreeze thaw);
 
-use Socket::GetAddrInfo qw(getaddrinfo);
+use Socket qw(getaddrinfo);
 
 sub main {
 	my $buffer = "";
@@ -60,7 +60,7 @@ POE::Component::Resolver::Sidecar - delegate subprocess to call getaddrinfo()
 
 =head1 VERSION
 
-version 0.919
+version 0.920
 
 =head1 SYNOPSIS
 

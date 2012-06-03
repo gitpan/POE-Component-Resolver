@@ -1,9 +1,23 @@
 ==================================================
-Changes from 2011-06-03 00:00:00 +0000 to present.
+Changes from 2011-06-04 00:00:00 +0000 to present.
 ==================================================
 
 ------------------------------------------
-version 0.919 at 2012-06-02 06:44:50 +0000
+version 0.920 at 2012-06-03 02:33:52 +0000
+------------------------------------------
+
+  Change: 2a038120059176b412e51388ab1a6494c03a15d5
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-06-02 22:32:41 +0000
+
+    Remove use of Socket::GetAddrInfo.
+
+    Socket 2.001 (and possibly earlier) expose getaddrinfo() so we don't
+    need Socket::GetAddrInfo anymore. Also, the author of that module
+    suggests that it's obsolete since Socket provides it now. 
+
+------------------------------------------
+version 0.919 at 2012-06-02 06:40:46 +0000
 ------------------------------------------
 
   Change: 4a415e5228e7c41da67027e7821ad606a418363f
@@ -192,5 +206,5 @@ version 0_913 at 2011-07-30 08:02:15 +0000
     rt.cpan.org ticket 69172, reported by Gabor Szabo. 
 
 ================================================
-Plus 4 releases after 2011-06-03 00:00:00 +0000.
+Plus 4 releases after 2011-06-04 00:00:00 +0000.
 ================================================

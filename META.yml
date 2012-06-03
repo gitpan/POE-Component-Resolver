@@ -15,11 +15,11 @@ name: POE-Component-Resolver
 requires:
   POE: 1.311
   Scalar::Util: 1.23
-  Socket::GetAddrInfo: 0.22
+  Socket: 2.001
   Storable: 2.18
   Test::More: 0.96
   Time::HiRes: 1.9711
 resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?POE-Component-Resolver
   repository: git://github.com/rcaputo/poe-component-resolver.git
-version: 0.919
+version: 0.920
