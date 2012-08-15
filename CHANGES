@@ -1,9 +1,22 @@
 ==================================================
-Changes from 2011-06-04 00:00:00 +0000 to present.
+Changes from 2011-08-16 00:00:00 +0000 to present.
 ==================================================
 
 ------------------------------------------
-version 0.920 at 2012-06-03 02:33:52 +0000
+version 0.921 at 2012-08-15 05:19:06 +0000
+------------------------------------------
+
+  Change: c20a7f76c2bed51677a36f8c0f17fedcc4ef5051
+  Author: Rocco Caputo <rcaputo@cpan.org>
+  Date : 2012-08-15 01:17:14 +0000
+
+    Fix a test failure if an internet isn't available.
+
+    Tests still don't pass but 'you actually get a "not ok" instead of
+    "Looks like you planned 4 tests but ran 3"'. Thanks, Tod McQuillin! 
+
+------------------------------------------
+version 0.920 at 2012-06-03 02:32:41 +0000
 ------------------------------------------
 
   Change: 2a038120059176b412e51388ab1a6494c03a15d5
@@ -163,48 +176,6 @@ version 0_914 at 2011-09-15 05:27:46 +0000
     notion of perlpath and _exe, per Sjors' recommendation and discussion
     of $^X in perlvar. 
 
-------------------------------------------
-version 0_913 at 2011-07-30 08:02:15 +0000
-------------------------------------------
-
-  Change: b2d2af51183d837e5e98d7cf0324ea9429ef54dc
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date : 2011-07-30 04:02:15 +0000
-
-    Bump the release version. 
-
-  Change: 82af41c8ab2dd061acd7deb9979fa6cb5c4725ae
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date : 2011-07-30 03:49:09 +0000
-
-    Allow developers to use sidecar-based modules with PAR and other
-    packagers.
-
-    Applied a modified versin of a patch from Markus Jansen at Ericsson.
-    It adds a parameter to POE::Component::Resolver so the developer can
-    point to a custom sidecar program. That program can be bundld in PAR
-    using special techniques. Thanks also go to Steffen Mueller and
-    Roderich Schupp, who helped design the patch. 
-
-  Change: f0d9d4484e3a3400c7b9ca6b712882e0e20a04d6
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date : 2011-07-29 08:59:32 +0000
-
-    Use port 80 rather than string "http" on Solaris.
-
-    Chris Williams discovered tests would fail on Solaris with "service
-    name not available for the specified socket type". It turns out they
-    don't list "http" in /etc/services. 
-
-  Change: 638cd9e616a5b4ffbf413672784f41896de97430
-  Author: Rocco Caputo <rcaputo@cpan.org>
-  Date : 2011-07-29 00:44:00 +0000
-
-    Load the POE::Component::Resolver::Sidecar class.
-
-    The presence of this module is requested on MSWin32. Resolves
-    rt.cpan.org ticket 69172, reported by Gabor Szabo. 
-
 ================================================
-Plus 4 releases after 2011-06-04 00:00:00 +0000.
+Plus 5 releases after 2011-08-16 00:00:00 +0000.
 ================================================

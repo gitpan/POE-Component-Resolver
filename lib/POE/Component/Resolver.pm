@@ -1,6 +1,6 @@
 package POE::Component::Resolver;
 {
-  $POE::Component::Resolver::VERSION = '0.920';
+  $POE::Component::Resolver::VERSION = '0.921';
 }
 
 use warnings;
@@ -529,7 +529,7 @@ POE::Component::Resolver - A non-blocking getaddrinfo() resolver
 
 =head1 VERSION
 
-version 0.920
+version 0.921
 
 =head1 SYNOPSIS
 
